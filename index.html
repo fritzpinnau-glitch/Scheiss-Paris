@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scheiß Paris - Tracker</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        /* Rustikaler Holz-Hintergrund */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #2b1810; 
+            background-image: repeating-linear-gradient(to bottom, #362015 0px, #362015 48px, #1a0e09 48px, #1a0e09 50px);
+            color: #2b1810; 
+            padding-bottom: 40px; 
+        }
+
+        /* NEU: Banner-Container für das Logo-Bild */
+        .banner-container {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(to bottom, #2b1810, #1a0e09);
+            border-bottom: 2px solid #5a331c;
+        }
+        
+        .header-image {
+            max-width: 100%;
+            height: auto;
+            max-height: 220px; /* Begrenzt die Höhe auf großen Bildschirmen */
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            border: 2px solid #8b5a2b;
+        }
+        
+        /* Header (Sticky Leiste für Status & Einstellungen) */
+        .header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: linear-gradient(to bottom, #5a331c, #361b0d); 
+            border-bottom: 3px solid #b8860b; /* Gold/Bronze Abschluss */
+            color: #fdf5e6; 
+            padding: 12px 20px; position: sticky; top: 0; z-index: 100; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5); 
+        }
+        .header-center { text-align: center; flex-grow: 1; }
+        .settings-btn { background: none; border: none; color: #fdf5e6; font-size: 24px; cursor: pointer; padding: 5px; text-shadow: 1px 1px 2px #000;}
+        
+        .container { padding: 15px; max-width: 600px; margin: 0 auto; }
+        
+        /* Überschriften auf dem Holz */
+        .section-title { 
+            font-family: "Georgia", serif; font-size: 20px; font-weight: bold; margin: 25px 0 10px 0; 
+            color: #fdf5e6; border-bottom: 2px solid #b8860b; padding-bottom: 5px; text-shadow: 1px 1px 3px #000;
+        }
+        
+        /* Pergament-Karten */
+        .card { 
+            background: #efe6d5; /* Pergament Farbe */
+            border: 2px solid #8b5a2b; 
+            border-radius: 8px; padding: 15px; margin-bottom: 15px; 
+            box-shadow: inset 0 0 20px rgba(139, 90, 43, 0.15), 0 4px 6px rgba(0,0,0,0.4); 
+        }
+        .card-title { 
+            font-family: "Georgia", serif; font-size: 18px; font-weight: bold; margin-bottom: 15px; 
+            color: #5c2a12; display: flex; align-items: center; justify-content: space-between; 
+            border-bottom: 1px solid #d2b48c; padding-bottom: 8px;
+        }
+        .card-title div { display: flex; align-items: center; }
+        .card-title span { margin-right: 8px; font-size: 20px; }
+        
+        .input-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e3d5b8; }
+        .input-row:last-child { border-bottom: none; }
+        .input-label { font-size: 16px; font-weight: bold; color: #3d2314; flex-grow: 1; }
+        
+        /* Eingabefelder */
+        .input-field, .name-input, select.wide-select { 
+            background: #fffbfa; border: 1px solid #bda88a; border-radius: 4px; 
+            font-size: 16px; padding: 8px; color: #3d2314; transition: border 0.2s, box-shadow 0.2s; 
+        }
+        .input-field { width: 70px; text-align: center; font-weight: bold;}
+        .input-field:focus, .name-input:focus, select.wide-select:focus { 
+            border-color: #8b5a2b; outline: none; box-shadow: 0 0 5px rgba(139, 90, 43, 0.4); 
+        }
+        
+        .error-highlight { border: 2px solid #a32a1c !important; background-color: #fbd6d2 !important; color: #a32a1c !important; }
+        .name-input { width: 100%; font-weight: bold; }
+        select.wide-select { width: 100%; padding: 10px; margin-top: 5px; font-weight: bold; cursor: pointer;}
+        
+        /* Drag & Drop Liste auf Pergament */
+        .sortable-list { list-style: none; position: relative; }
+        .sortable-item { 
+            display: flex; align-items: center; padding: 10px 15px; margin-bottom: 8px; 
+            background: #fffbfa; border: 1px solid #bda88a; border-radius: 6px; 
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1); user-select: none; transition: transform 0.1s; touch-action: none; 
+        }
+        .sortable-item.touch-dragging {
+            position: fixed !important; z-index: 9999; box-shadow: 0 10px 20px rgba(0,0,0,0.4); background: #fdf8eb; opacity: 0.95; pointer-events: none; max-width: 540px; border: 2px solid #8b5a2b;
+        }
+        .sortable-ghost { opacity: 0.3; background: #d2b48c; border: 1px dashed #8b5a2b; }
+        .rank-badge { width: 28px; height: 28px; background: #8b2621; color: #fdf5e6; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 14px; margin-right: 15px; flex-shrink: 0; box-shadow: inset 0 -2px 4px rgba(0,0,0,0.3);}
+        .player-name-lbl { font-size: 16px; font-weight: bold; color: #3d2314; flex-grow: 1; }
+        .drag-handle { color: #8b5a2b; font-size: 24px; padding: 5px 10px; margin-right: -10px; cursor: grab; }
+        .drag-handle:active { cursor: grabbing; }
+
+        /* Rustikale Buttons */
+        .btn { width: 100%; font-size: 16px; font-family: "Georgia", serif; font-weight: bold; padding: 14px; border: 1px solid #1a3311; border-radius: 6px; cursor: pointer; color: #fdf5e6; margin-top: 10px; text-shadow: 1px 1px 2px #000;}
+        .btn-primary { background: linear-gradient(to bottom, #446e35, #294520); box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .btn-primary:active { background: #294520; transform: translateY(1px); box-shadow: 0 2px 3px rgba(0,0,0,0.3); }
+        .btn-danger { background: linear-gradient(to bottom, #a3382c, #751c13); border-color: #4a0d07; margin-top: 20px; }
+        .btn-danger:active { background: #751c13; }
+        .btn-edit { background: linear-gradient(to bottom, #c98e26, #9c6c19); border: 1px solid #5a3c0b; padding: 6px 10px; font-size: 13px; font-family: -apple-system, sans-serif; border-radius: 4px; width: auto; margin: 0; }
+        .btn-secondary { background: linear-gradient(to bottom, #7f8c8d, #5a6566); border-color: #2c3e50; }
+        
+        /* Historie & Tabellen auf Pergament */
+        .leaderboard-row, .history-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e3d5b8; align-items: center; }
+        .leaderboard-row:last-child, .history-row:last-child { border-bottom: none; }
+        .name-col { font-weight: bold; font-size: 16px; color: #3d2314; margin-bottom: 2px; }
+        .money-col { font-size: 18px; font-weight: bold; min-width: 80px; text-align: right; }
+        .details-text { font-size: 12px; color: #786450; font-weight: bold;}
+        
+        .pos { color: #2e6019; } .neg { color: #a32a1c; } .zero { color: #786450; }
+
+        .history-card { background: #efe6d5; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #d2b48c; padding-bottom: 10px; margin-bottom: 10px; }
+        .history-title { font-family: "Georgia", serif; font-size: 16px; color: #5c2a12; font-weight: bold; }
+        
+        .error-box { background-color: #fbd6d2; border: 2px solid #a32a1c; color: #a32a1c; padding: 12px; border-radius: 6px; margin-bottom: 15px; display: none; font-size: 14px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        
+        /* Setup Bar */
+        .setup-bar { display: flex; align-items: center; justify-content: space-between; background: #efe6d5; padding: 12px 15px; border-radius: 8px; border: 2px solid #8b5a2b; box-shadow: inset 0 0 10px rgba(139, 90, 43, 0.1), 0 4px 6px rgba(0,0,0,0.4); margin-bottom: 15px; color: #5c2a12;}
+        .setup-bar select { font-size: 15px; padding: 6px; border-radius: 4px; border: 1px solid #bda88a; background: #fffbfa; font-weight: bold; color: #3d2314;}
+
+        /* Modal (Einstellungen) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; overflow-y: auto; }
+        .modal-content { background: #efe6d5; border: 3px solid #8b5a2b; margin: 30px auto; padding: 20px; max-width: 500px; border-radius: 8px; width: 90%; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.8); color: #3d2314;}
+        .modal-close { position: absolute; top: 10px; right: 15px; font-size: 28px; cursor: pointer; color: #8b5a2b; font-weight: bold;}
+        .settings-group { margin-bottom: 15px; border: 1px solid #d2b48c; padding: 10px; border-radius: 6px; background: #f5eedf;}
+        .settings-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: bold;}
+        .settings-input { width: 80px; text-align: right; padding: 5px; font-size: 14px; border: 1px solid #bda88a; border-radius: 4px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<!-- NEU: Das große Bild als Header-Banner -->
+<div class="banner-container">
+    <img src="Paris_Header.jpg" alt="Scheiß Paris Kartenspiel" class="header-image">
+</div>
+
+<!-- Sticky Statusleiste darunter -->
+<div class="header">
+    <div style="width: 30px;"></div>
+    <div class="header-center">
+        <div style="font-size: 18px; color: #fdf5e6; font-weight: bold; font-family: 'Georgia', serif; text-shadow: 1px 1px 2px #000;" id="roundCounterText">Runde 1</div>
+    </div>
+    <button class="settings-btn" onclick="openSettings()">⚙️</button>
+</div>
+
+<div class="container">
+    
+    <div class="setup-bar" id="playerCountBar">
+        <strong>Spieleranzahl:</strong>
+        <select id="playerCount" onchange="checkAndBuild()">
+            <option value="4" selected>4 Personen</option>
+            <option value="5">5 Personen</option>
+            <option value="6">6 Personen</option>
+        </select>
+    </div>
+
+    <div id="standingsWrapper" style="display: none;">
+        <div class="section-title">🏆 Gesamt-Bilanz</div>
+        <div class="card">
+            <div id="standingsContent"></div>
+        </div>
+    </div>
+
+    <div class="section-title" id="eingabeTitelWrapper">📝 Eingabe: <span id="currentRoundTitle">Runde 1</span></div>
+    
+    <div id="errorBox" class="error-box"></div>
+
+    <div id="mainInputArea">
+        <div class="card">
+            <div class="card-title"><div><span>👥</span> Mitspieler</div></div>
+            <div id="namesContainer"></div>
+        </div>
+
+        <div id="categoriesContainer"></div>
+
+        <div class="card">
+            <div class="card-title"><div><span>👑</span> Max </div></div>
+            <select id="max_winner" class="wide-select" onchange="styleSelect(this)"></select>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><div><span>🏁</span> Letzter Stich</div></div>
+            <select id="letzter_winner" class="wide-select" onchange="styleSelect(this)"></select>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><div><span>🏅</span> Auslegen (Reihenfolge)</div></div>
+            <p style="font-size: 13px; color: #786450; font-weight: bold; margin-bottom: 12px; margin-top: -8px;">Halte ☰ gedrückt, um die Spieler frei zu verschieben.</p>
+            <div id="auslegenContainer"></div>
+        </div>
+
+        <button id="saveButton" class="btn btn-primary" onclick="saveRound()">✓ Runde berechnen & speichern</button>
+    </div>
+
+    <div id="historyWrapper" style="display: none; margin-top: 30px;">
+        <div class="section-title">📜 Runden-Verlauf</div>
+        <div id="historyContent"></div>
+        <button class="btn btn-danger" onclick="resetGame()">🗑 Komplettes Spiel zurücksetzen</button>
+    </div>
+
+</div>
+
+<!-- EINSTELLUNGEN MODAL -->
+<div id="settingsModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeSettings()">&times;</span>
+        <h2 style="margin-bottom: 20px; font-family: 'Georgia', serif; color: #5c2a12; border-bottom: 2px solid #d2b48c; padding-bottom: 5px;">Königlicher Paristarif</h2>
+        
+        <div style="margin-bottom: 15px; font-weight: bold;">
+            <strong>Modus:</strong>
+            <select id="settingsPlayerCount" onchange="loadSettingsForm()" style="padding: 5px; font-size: 14px; margin-left: 10px; font-weight: bold; background: #fffbfa; border: 1px solid #bda88a; border-radius: 4px;">
+                <option value="4">4 Personen</option>
+                <option value="5">5 Personen</option>
+                <option value="6">6 Personen</option>
+            </select>
+        </div>
+
+        <div class="settings-group">
+            <div class="settings-row" style="color: #5c2a12;">
+                <strong>Budget (€) pro Runde:</strong>
+                <input type="number" step="0.10" id="set_budget" class="settings-input">
+            </div>
+            <hr style="border:0; border-top:1px solid #d2b48c; margin:10px 0;">
+            <div class="settings-row"><span>Stich (pro Stück):</span> <input type="number" step="0.05" id="set_stich" class="settings-input"></div>
+            <div class="settings-row"><span>Herz (pro Stück):</span> <input type="number" step="0.05" id="set_herz" class="settings-input"></div>
+            <div class="settings-row"><span>Ober (pro Stück):</span> <input type="number" step="0.05" id="set_ober" class="settings-input"></div>
+            <div class="settings-row"><span>Max (Pauschal):</span> <input type="number" step="0.10" id="set_max" class="settings-input"></div>
+            <div class="settings-row"><span>Letzter Stich (Pausch.):</span> <input type="number" step="0.10" id="set_letzter" class="settings-input"></div>
+        </div>
+
+        <div style="font-size: 13px; color: #2e6019; font-weight: bold; margin-bottom: 15px;" id="settingsPreview"></div>
+
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-secondary" onclick="resetToDefaults()">Standard</button>
+            <button class="btn btn-primary" onclick="saveSettings()">Speichern</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const DEFAULT_TARIFFS = {
+        4: { budget: 4.00, stich: 0.10, herz: 0.10, ober: 0.20, max: 0.80, letzter: 0.80, payouts: [2.50, 1.00, 0.50, 0.00] },
+        5: { budget: 6.00, stich: 0.20, herz: 0.15, ober: 0.30, max: 1.20, letzter: 1.20, payouts: [2.75, 1.75, 1.00, 0.50, 0.00] },
+        6: { budget: 7.90, stich: 0.30, herz: 0.20, ober: 0.40, max: 1.60, letzter: 1.60, payouts: [2.90, 2.00, 1.50, 1.00, 0.50, 0.00] }
+    };
+
+    let tariffs = JSON.parse(JSON.stringify(DEFAULT_TARIFFS)); 
+    let gameState = { rounds: [], playerNames: [] };
+    let editModeIndex = -1;
+
+    function checkAndBuild() {
+        if (gameState.rounds.length > 0) {
+            if (!confirm("Achtung! Wenn du die Spieleranzahl änderst, wird der aktuelle Spielstand gelöscht. Fortfahren?")) {
+                document.getElementById('playerCount').value = gameState.rounds[0].players.length;
+                return;
+            }
+        }
+        gameState.rounds = [];
+        gameState.playerNames = [];
+        editModeIndex = -1;
+        buildUI();
+        updateUI();
+    }
+
+    function buildUI() {
+        const count = parseInt(document.getElementById('playerCount').value);
+        
+        let namesHtml = '';
+        for(let i = 1; i <= count; i++) {
+            let defaultName = gameState.playerNames[i-1] || `Spieler ${i}`;
+            namesHtml += `<div class="input-row">
+                <input type="text" class="name-input" id="name_${i}" value="${defaultName}" oninput="updateLabels()" placeholder="Name Spieler ${i}">
+            </div>`;
+        }
+        document.getElementById('namesContainer').innerHTML = namesHtml;
+
+        const categories = [
+            { id: 'stich', icon: '🔪', title: 'Stiche (max. 8)' },
+            { id: 'herz', icon: '❤️', title: 'Herz (max. 8)' },
+            { id: 'ober', icon: '🦅', title: 'Ober (max. 4)' }
+        ];
+
+        let catHtml = '';
+        categories.forEach(cat => {
+            catHtml += `<div class="card"><div class="card-title"><div><span>${cat.icon}</span> ${cat.title}</div></div>`;
+            for(let i = 1; i <= count; i++) {
+                catHtml += `<div class="input-row">
+                    <span class="input-label" id="label_${cat.id}_${i}">Spieler ${i}</span>
+                    <input type="number" pattern="[0-9]*" inputmode="numeric" class="input-field live-check" id="${cat.id}_${i}" value="0" oninput="checkLimitsLive()" onblur="fillZero(this)">
+                </div>`;
+            }
+            catHtml += `</div>`;
+        });
+        document.getElementById('categoriesContainer').innerHTML = catHtml;
+
+        let defaultOrder = [];
+        for(let i = 1; i <= count; i++) defaultOrder.push(i);
+        buildAuslegenList(defaultOrder);
+
+        updateLabels();
+        hideError();
+    }
+
+    function fillZero(element) {
+        if (element.value === "") {
+            element.value = "0";
+            checkLimitsLive();
+        }
+    }
+
+    function checkLimitsLive() {
+        const count = parseInt(document.getElementById('playerCount').value);
+        let sums = { stich: 0, herz: 0, ober: 0 };
+        
+        for (let i = 1; i <= count; i++) {
+            sums.stich += parseInt(document.getElementById(`stich_${i}`).value || 0);
+            sums.herz += parseInt(document.getElementById(`herz_${i}`).value || 0);
+            sums.ober += parseInt(document.getElementById(`ober_${i}`).value || 0);
+        }
+        
+        ['stich', 'herz', 'ober'].forEach(cat => {
+            const limit = cat === 'ober' ? 4 : 8;
+            const isError = sums[cat] > limit;
+            
+            for (let i = 1; i <= count; i++) {
+                const el = document.getElementById(`${cat}_${i}`);
+                if (el) {
+                    if (isError) el.classList.add('error-highlight');
+                    else el.classList.remove('error-highlight');
+                }
+            }
+        });
+    }
+
+    function buildAuslegenList(orderArray) {
+        let auslegenHtml = '<ul id="auslegenList" class="sortable-list">';
+        orderArray.forEach((playerId, index) => {
+            const name = gameState.playerNames[playerId - 1] || `Spieler ${playerId}`;
+            auslegenHtml += `
+                <li class="sortable-item" data-player-id="${playerId}">
+                    <div class="rank-badge">${index + 1}.</div>
+                    <div class="player-name-lbl" id="auslegen_name_${playerId}">${name}</div>
+                    <div class="drag-handle">☰</div>
+                </li>
+            `;
+        });
+        auslegenHtml += '</ul>';
+        document.getElementById('auslegenContainer').innerHTML = auslegenHtml;
+        initTouchDragAndDrop(); 
+    }
+
+    function initTouchDragAndDrop() {
+        const list = document.getElementById('auslegenList');
+        const items = list.querySelectorAll('.sortable-item');
+        let draggedItem = null;
+        let ghostItem = null;
+        let startY = 0;
+        let initialTop = 0;
+
+        function updateRanks() {
+            const currentItems = list.querySelectorAll('.sortable-item:not(.sortable-ghost)');
+            currentItems.forEach((item, index) => {
+                const badge = item.querySelector('.rank-badge');
+                if(badge) badge.innerText = `${index + 1}.`;
+            });
+        }
+
+        function triggerVibration() {
+            if ("vibrate" in navigator) navigator.vibrate(50);
+        }
+
+        items.forEach(item => {
+            const handle = item.querySelector('.drag-handle');
+            
+            const startDrag = function(e, clientY) {
+                draggedItem = item;
+                triggerVibration();
+                document.body.style.overflow = 'hidden'; 
+                const rect = item.getBoundingClientRect();
+                startY = clientY;
+                initialTop = rect.top;
+
+                ghostItem = item.cloneNode(true);
+                ghostItem.classList.add('sortable-ghost');
+                item.after(ghostItem);
+
+                item.classList.add('touch-dragging');
+                item.style.top = `${initialTop}px`;
+                item.style.left = `${rect.left}px`;
+                item.style.width = `${rect.width}px`;
+            };
+
+            const moveDrag = function(e, clientY) {
+                if (!draggedItem) return;
+                e.preventDefault();
+                const deltaY = clientY - startY;
+                draggedItem.style.top = `${initialTop + deltaY}px`;
+
+                const dragRect = draggedItem.getBoundingClientRect();
+                const dragCenterY = dragRect.top + (dragRect.height / 2);
+                const currentItems = Array.from(list.querySelectorAll('.sortable-item:not(.touch-dragging)'));
+                
+                let nextSibling = null;
+                for (let i = 0; i < currentItems.length; i++) {
+                    const el = currentItems[i];
+                    if(el === ghostItem) continue; 
+                    const rect = el.getBoundingClientRect();
+                    const elCenterY = rect.top + (rect.height / 2);
+                    if (dragCenterY < elCenterY) {
+                        nextSibling = el;
+                        break;
+                    }
+                }
+                if (nextSibling) list.insertBefore(ghostItem, nextSibling);
+                else list.appendChild(ghostItem);
+                updateRanks();
+            };
+
+            const endDrag = function() {
+                if(!draggedItem) return;
+                ghostItem.replaceWith(draggedItem);
+                draggedItem.classList.remove('touch-dragging');
+                draggedItem.style.top = ''; draggedItem.style.left = ''; draggedItem.style.width = '';
+                draggedItem = null; ghostItem = null;
+                document.body.style.overflow = '';
+                updateRanks();
+            };
+
+            handle.addEventListener('touchstart', (e) => startDrag(e, e.touches[0].clientY), {passive: false});
+            handle.addEventListener('touchmove', (e) => moveDrag(e, e.touches[0].clientY), {passive: false});
+            handle.addEventListener('touchend', endDrag);
+
+            handle.addEventListener('mousedown', (e) => startDrag(e, e.clientY));
+            document.addEventListener('mousemove', (e) => { if(draggedItem) moveDrag(e, e.clientY); });
+            document.addEventListener('mouseup', () => { if(draggedItem) endDrag(); });
+        });
+    }
+
+    function styleSelect(el) {
+        if (!el.value) {
+            el.style.fontStyle = 'italic';
+            el.style.color = '#786450'; 
+        } else {
+            el.style.fontStyle = 'normal';
+            el.style.color = '#3d2314'; 
+        }
+    }
+
+    function updateLabels() {
+        const count = parseInt(document.getElementById('playerCount').value);
+        const maxSelect = document.getElementById('max_winner');
+        const letzterSelect = document.getElementById('letzter_winner');
+        
+        const maxVal = maxSelect.value;
+        const letzterVal = letzterSelect.value;
+
+        let optionsHtml = '<option value="" disabled selected hidden>- auswählen -</option>';
+        gameState.playerNames = [];
+
+        for(let i=1; i<=count; i++) {
+            const name = document.getElementById(`name_${i}`).value || `Spieler ${i}`;
+            gameState.playerNames.push(name);
+            
+            document.getElementById(`label_stich_${i}`).innerText = name;
+            document.getElementById(`label_herz_${i}`).innerText = name;
+            document.getElementById(`label_ober_${i}`).innerText = name;
+            
+            const auslegenLbl = document.getElementById(`auslegen_name_${i}`);
+            if(auslegenLbl) auslegenLbl.innerText = name;
+
+            optionsHtml += `<option value="${i}">${name}</option>`;
+        }
+        
+        maxSelect.innerHTML = optionsHtml;
+        letzterSelect.innerHTML = optionsHtml;
+        
+        if(maxVal && maxVal <= count) maxSelect.value = maxVal;
+        if(letzterVal && letzterVal <= count) letzterSelect.value = letzterVal;
+
+        styleSelect(maxSelect);
+        styleSelect(letzterSelect);
+    }
+
+    function formatMoney(amount) { return amount.toFixed(2).replace('.', ',') + ' €'; }
+    function getMoneyClass(amount) { return amount > 0 ? 'pos' : (amount < 0 ? 'neg' : 'zero'); }
+    
+    function showError(messages) {
+        const box = document.getElementById('errorBox');
+        box.innerHTML = "Fehler:<br>• " + messages.join("<br>• ");
+        box.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function hideError() { document.getElementById('errorBox').style.display = 'none'; }
+
+    function editRound(index) {
+        const round = gameState.rounds[index];
+        const count = parseInt(document.getElementById('playerCount').value);
+        
+        editModeIndex = index; 
+        hideError();
+        document.querySelectorAll('.error-highlight').forEach(el => el.classList.remove('error-highlight'));
+
+        for(let i=1; i<=count; i++) {
+            const raw = round.rawInputs[i-1];
+            document.getElementById(`stich_${i}`).value = raw.stich;
+            document.getElementById(`herz_${i}`).value = raw.herz;
+            document.getElementById(`ober_${i}`).value = raw.ober;
+        }
+        document.getElementById('max_winner').value = round.maxWinner;
+        document.getElementById('letzter_winner').value = round.letzterWinner;
+        
+        styleSelect(document.getElementById('max_winner'));
+        styleSelect(document.getElementById('letzter_winner'));
+
+        let oldOrder = [];
+        for(let i=1; i<=count; i++) {
+            oldOrder.push({ id: i, platz: round.rawInputs[i-1].platz });
+        }
+        oldOrder.sort((a,b) => a.platz - b.platz);
+        buildAuslegenList(oldOrder.map(item => item.id));
+
+        document.getElementById('currentRoundTitle').innerText = `Runde ${round.roundNum} bearbeiten`;
+        document.getElementById('roundCounterText').innerText = `Bearbeite Runde ${round.roundNum}`;
+        document.getElementById('saveButton').innerText = "✓ Änderungen speichern";
+        
+        document.getElementById('playerCountBar').style.display = 'none';
+        
+        checkLimitsLive(); 
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function saveRound() {
+        hideError();
+        const count = parseInt(document.getElementById('playerCount').value);
+        const t = tariffs[count];
+        let errors = [];
+
+        const maxWinner = document.getElementById('max_winner').value;
+        const letzterWinner = document.getElementById('letzter_winner').value;
+
+        if (!maxWinner) errors.push("Max: Bitte einen Gewinner auswählen.");
+        if (!letzterWinner) errors.push("Letzter Stich: Bitte einen Gewinner auswählen.");
+
+        let placements = {};
+        const sortableItems = document.querySelectorAll('#auslegenList .sortable-item:not(.sortable-ghost)');
+        sortableItems.forEach((li, index) => {
+            const playerId = parseInt(li.getAttribute('data-player-id'));
+            placements[playerId] = index + 1; 
+        });
+
+        let totalStich = 0, totalHerz = 0, totalOber = 0;
+        let roundResults = [], rawInputs = [];
+
+        for(let i=1; i<=count; i++) {
+            const name = gameState.playerNames[i-1];
+            const stichText = document.getElementById(`stich_${i}`).value;
+            const herzText = document.getElementById(`herz_${i}`).value;
+            const oberText = document.getElementById(`ober_${i}`).value;
+
+            const stich = stichText === "" ? 0 : parseInt(stichText);
+            const herz = herzText === "" ? 0 : parseInt(herzText);
+            const ober = oberText === "" ? 0 : parseInt(oberText);
+            const platz = placements[i];
+
+            if(stich < 0 || herz < 0 || ober < 0) errors.push(`${name}: Keine negativen Zahlen erlaubt.`);
+            
+            totalStich += stich; totalHerz += herz; totalOber += ober;
+            
+            const max = (maxWinner == i) ? 1 : 0;
+            const letzter = (letzterWinner == i) ? 1 : 0;
+            
+            const cost = (stich * t.stich) + (herz * t.herz) + (ober * t.ober) + (max * t.max) + (letzter * t.letzter);
+            let won = t.payouts[platz - 1];
+            
+            roundResults.push({ id: i, name: name, cost: cost, won: won, balance: won - cost });
+            rawInputs.push({ stich: stich, herz: herz, ober: ober, platz: platz });
+        }
+
+        if (totalStich > 8) errors.push(`Maximal 8 Stiche erlaubt (Eingetragen: ${totalStich}).`);
+        if (totalHerz > 8) errors.push(`Maximal 8 Herzen erlaubt (Eingetragen: ${totalHerz}).`);
+        if (totalOber > 4) errors.push(`Maximal 4 Ober erlaubt (Eingetragen: ${totalOber}).`);
+        
+        if (errors.length > 0) { showError(errors); return; }
+
+        const roundData = { 
+            roundNum: editModeIndex !== -1 ? gameState.rounds[editModeIndex].roundNum : gameState.rounds.length + 1, 
+            players: roundResults, rawInputs: rawInputs, maxWinner: maxWinner, letzterWinner: letzterWinner
+        };
+
+        if (editModeIndex !== -1) {
+            gameState.rounds[editModeIndex] = roundData;
+            editModeIndex = -1;
+            document.getElementById('saveButton').innerText = "✓ Runde berechnen & speichern";
+            document.getElementById('playerCountBar').style.display = 'flex'; 
+        } else {
+            gameState.rounds.push(roundData);
+        }
+
+        for(let i=1; i<=count; i++) {
+            document.getElementById(`stich_${i}`).value = "0";
+            document.getElementById(`herz_${i}`).value = "0";
+            document.getElementById(`ober_${i}`).value = "0";
+        }
+        document.getElementById('max_winner').value = "";
+        document.getElementById('letzter_winner').value = "";
+        
+        styleSelect(document.getElementById('max_winner'));
+        styleSelect(document.getElementById('letzter_winner'));
+
+        let defaultOrder = [];
+        for(let i = 1; i <= count; i++) defaultOrder.push(i);
+        buildAuslegenList(defaultOrder);
+        checkLimitsLive(); 
+
+        updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateUI() {
+        const roundNum = editModeIndex !== -1 ? gameState.rounds[editModeIndex].roundNum : gameState.rounds.length + 1;
+        document.getElementById('roundCounterText').innerText = editModeIndex !== -1 ? `Bearbeite Runde ${roundNum}` : `Runde ${roundNum}`;
+        document.getElementById('currentRoundTitle').innerText = editModeIndex !== -1 ? `Runde ${roundNum} bearbeiten` : `Runde ${roundNum}`;
+
+        if (gameState.rounds.length > 0) {
+            document.getElementById('standingsWrapper').style.display = 'block';
+            document.getElementById('historyWrapper').style.display = 'block';
+            renderStandings();
+            renderHistory();
+        } else {
+            document.getElementById('standingsWrapper').style.display = 'none';
+            document.getElementById('historyWrapper').style.display = 'none';
+        }
+    }
+
+    function renderStandings() {
+        const count = parseInt(document.getElementById('playerCount').value);
+        let totals = Array.from({length: count}, () => ({ balance: 0, cost: 0, won: 0 }));
+        
+        gameState.rounds.forEach(round => {
+            round.players.forEach((p, index) => { 
+                totals[index].balance += p.balance; 
+                totals[index].cost += p.cost; 
+                totals[index].won += p.won; 
+            });
+        });
+
+        let standings = [];
+        for(let i=0; i<count; i++) {
+            standings.push({ name: gameState.playerNames[i], balance: totals[i].balance, cost: totals[i].cost, won: totals[i].won });
+        }
+        standings.sort((a, b) => b.balance - a.balance);
+
+        let html = '';
+        standings.forEach((p, index) => {
+            let prefix = p.balance > 0 ? '+' : '';
+            let medal = index === 0 ? '🥇 ' : (index === 1 ? '🥈 ' : (index === 2 ? '🥉 ' : ''));
+            html += `<div class="leaderboard-row">
+                <div style="flex-grow: 1;">
+                    <div class="name-col">${medal}${p.name}</div>
+                    <div class="details-text">Zahlt: ${formatMoney(p.cost)} | Gewinnt: ${formatMoney(p.won)}</div>
+                </div>
+                <div class="money-col ${getMoneyClass(p.balance)}">${prefix}${formatMoney(p.balance)}</div>
+            </div>`;
+        });
+        document.getElementById('standingsContent').innerHTML = html;
+    }
+
+    function renderHistory() {
+        let html = '';
+        const reversedRounds = [...gameState.rounds].map((r, i) => ({...r, originalIndex: i})).reverse();
+        
+        reversedRounds.forEach(round => {
+            html += `<div class="card history-card">
+                <div class="history-header">
+                    <div class="history-title">Runde ${round.roundNum}</div>
+                    <button class="btn btn-edit" onclick="editRound(${round.originalIndex})">✏️ Bearbeiten</button>
+                </div>`;
+            round.players.forEach(p => {
+                let prefix = p.balance > 0 ? '+' : '';
+                html += `<div class="history-row">
+                    <div style="flex-grow: 1;">
+                        <div class="name-col" style="font-size: 15px;">${p.name}</div>
+                        <div class="details-text">Zahlt: ${formatMoney(p.cost)} | Gewinnt: ${formatMoney(p.won)}</div>
+                    </div>
+                    <div class="money-col ${getMoneyClass(p.balance)}" style="font-size: 16px;">${prefix}${formatMoney(p.balance)}</div>
+                </div>`;
+            });
+            html += `</div>`;
+        });
+        document.getElementById('historyContent').innerHTML = html;
+    }
+
+    function resetGame() {
+        if(confirm("Möchtest du das Spiel wirklich beenden und löschen?")) {
+            window.location.reload(); 
+        }
+    }
+
+    function openSettings() {
+        document.getElementById('settingsModal').style.display = 'block';
+        document.getElementById('settingsPlayerCount').value = document.getElementById('playerCount').value;
+        loadSettingsForm();
+    }
+
+    function closeSettings() {
+        document.getElementById('settingsModal').style.display = 'none';
+    }
+
+    function loadSettingsForm() {
+        const count = parseInt(document.getElementById('settingsPlayerCount').value);
+        const t = tariffs[count];
+        
+        document.getElementById('set_budget').value = t.budget.toFixed(2);
+        document.getElementById('set_stich').value = t.stich.toFixed(2);
+        document.getElementById('set_herz').value = t.herz.toFixed(2);
+        document.getElementById('set_ober').value = t.ober.toFixed(2);
+        document.getElementById('set_max').value = t.max.toFixed(2);
+        document.getElementById('set_letzter').value = t.letzter.toFixed(2);
+        
+        updateSettingsPreview(t);
+    }
+
+    function updateSettingsPreview(t) {
+        let payoutText = `Auszahlungen: 1. Platz: ${t.payouts[0].toFixed(2)}€ | 2. Platz: ${t.payouts[1].toFixed(2)}€ | 3. Platz: ${t.payouts[2].toFixed(2)}€`;
+        document.getElementById('settingsPreview').innerText = payoutText;
+    }
+
+    function resetToDefaults() {
+        const count = parseInt(document.getElementById('settingsPlayerCount').value);
+        if(confirm(`Möchtest du die Tarife für ${count} Personen wirklich auf die Standardwerte zurücksetzen?`)) {
+            tariffs[count] = JSON.parse(JSON.stringify(DEFAULT_TARIFFS[count]));
+            loadSettingsForm(); 
+        }
+    }
+
+    function saveSettings() {
+        const count = parseInt(document.getElementById('settingsPlayerCount').value);
+        
+        const b = parseFloat(document.getElementById('set_budget').value);
+        const s = parseFloat(document.getElementById('set_stich').value);
+        const h = parseFloat(document.getElementById('set_herz').value);
+        const o = parseFloat(document.getElementById('set_ober').value);
+        const m = parseFloat(document.getElementById('set_max').value);
+        const l = parseFloat(document.getElementById('set_letzter').value);
+
+        tariffs[count].budget = b;
+        tariffs[count].stich = s;
+        tariffs[count].herz = h;
+        tariffs[count].ober = o;
+        tariffs[count].max = m;
+        tariffs[count].letzter = l;
+
+        const oldBudget = DEFAULT_TARIFFS[count].budget; 
+        const ratio = b / oldBudget;
+        
+        if (count === 4) {
+            tariffs[4].payouts = [2.50 * ratio, 1.00 * ratio, 0.50 * ratio, 0.00];
+        } else if (count === 5) {
+            tariffs[5].payouts = [2.75 * ratio, 1.75 * ratio, 1.00 * ratio, 0.50 * ratio, 0.00];
+        } else if (count === 6) {
+            tariffs[6].payouts = [2.90 * ratio, 2.00 * ratio, 1.50 * ratio, 1.00 * ratio, 0.50 * ratio, 0.00];
+        }
+
+        alert(`Tarife für ${count} Personen aktualisiert.`);
+        closeSettings();
+    }
+
+    window.onload = buildUI;
+</script>
+
+</body>
+</html>
