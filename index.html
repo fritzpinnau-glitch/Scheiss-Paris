@@ -145,7 +145,7 @@
         .drag-handle { color: #9ca3af; font-size: 24px; padding: 10px 15px; margin-right: -15px; cursor: grab; }
         .drag-handle:active { cursor: grabbing; color: var(--accent-gold); }
 
-        /* Buttons (Fitts's Law) */
+        /* Buttons */
         .btn { 
             width: 100%; height: 56px; font-size: 17px; font-weight: 700; 
             border: none; border-radius: 12px; cursor: pointer; 
@@ -198,6 +198,19 @@
         .settings-row:last-child { margin-bottom: 0; }
         .settings-input { width: 90px; height: 40px; text-align: right; padding: 0 12px; font-size: 15px; border: 1.5px solid var(--border-color); border-radius: 8px; font-weight: 700; background: #ffffff; }
         .settings-input:focus { border-color: var(--accent-gold); outline: none; }
+        
+        /* Neu: Styling für nicht-bearbeitbare Inputs */
+        .settings-input[readonly] {
+            background-color: #f3f4f6;
+            color: var(--text-muted);
+            cursor: not-allowed;
+            border-color: #e5e7eb;
+        }
+        .settings-input[readonly]:focus {
+            border-color: #e5e7eb;
+            box-shadow: none;
+        }
+
         .modal-buttons { display: flex; gap: 12px; }
         .modal-buttons .btn { margin-top: 0; }
     </style>
@@ -209,7 +222,7 @@
 </div>
 
 <div class="header">
-    <div style="width: 40px;"></div> <!-- Spacer für Zentrierung -->
+    <div style="width: 40px;"></div>
     <div class="header-title" id="roundCounterText">Runde 1</div>
     <button class="settings-btn" onclick="openSettings()">⚙️</button>
 </div>
@@ -289,14 +302,15 @@
         <div class="settings-group">
             <div class="settings-row">
                 <strong>Budget (€) pro Runde:</strong>
-                <input type="number" step="0.10" id="set_budget" class="settings-input">
+                <input type="number" step="0.10" id="set_budget" class="settings-input" oninput="autoCalcSettings()">
             </div>
             <hr style="border:0; border-top:1px solid var(--border-color); margin:16px 0;">
-            <div class="settings-row"><span>Stich (pro Stück):</span> <input type="number" step="0.05" id="set_stich" class="settings-input"></div>
-            <div class="settings-row"><span>Herz (pro Stück):</span> <input type="number" step="0.05" id="set_herz" class="settings-input"></div>
-            <div class="settings-row"><span>Ober (pro Stück):</span> <input type="number" step="0.05" id="set_ober" class="settings-input"></div>
-            <div class="settings-row"><span>Max (Pauschal):</span> <input type="number" step="0.10" id="set_max" class="settings-input"></div>
-            <div class="settings-row"><span>Letzter Stich (Pausch.):</span> <input type="number" step="0.10" id="set_letzter" class="settings-input"></div>
+            <!-- Die unteren Felder sind nun readonly -->
+            <div class="settings-row"><span>Stich (pro Stück):</span> <input type="number" id="set_stich" class="settings-input" readonly></div>
+            <div class="settings-row"><span>Herz (pro Stück):</span> <input type="number" id="set_herz" class="settings-input" readonly></div>
+            <div class="settings-row"><span>Ober (pro Stück):</span> <input type="number" id="set_ober" class="settings-input" readonly></div>
+            <div class="settings-row"><span>Max (Pauschal):</span> <input type="number" id="set_max" class="settings-input" readonly></div>
+            <div class="settings-row"><span>Letzter Stich (Pausch.):</span> <input type="number" id="set_letzter" class="settings-input" readonly></div>
         </div>
 
         <div style="font-size: 14px; color: var(--success-green); font-weight: 600; margin-bottom: 24px; text-align: center; background: #f0fdf4; padding: 12px; border-radius: 8px;" id="settingsPreview"></div>
@@ -309,16 +323,70 @@
 </div>
 
 <script>
-    // Das gesamte JavaScript bleibt absolut unangetastet, damit die Spiellogik perfekt weiterfunktioniert.
     const DEFAULT_TARIFFS = {
         4: { budget: 4.00, stich: 0.10, herz: 0.10, ober: 0.20, max: 0.80, letzter: 0.80, payouts: [2.50, 1.00, 0.50, 0.00] },
-        5: { budget: 6.00, stich: 0.20, herz: 0.15, ober: 0.30, max: 1.20, letzter: 1.20, payouts: [2.75, 1.75, 1.00, 0.50, 0.00] },
-        6: { budget: 7.90, stich: 0.30, herz: 0.20, ober: 0.40, max: 1.60, letzter: 1.60, payouts: [2.90, 2.00, 1.50, 1.00, 0.50, 0.00] }
+        5: { budget: 6.00, stich: 0.15, herz: 0.15, ober: 0.30, max: 1.20, letzter: 1.20, payouts: [3.20, 1.60, 0.80, 0.40, 0.00] },
+        6: { budget: 8.00, stich: 0.20, herz: 0.20, ober: 0.40, max: 1.60, letzter: 1.60, payouts: [4.00, 2.00, 1.00, 0.65, 0.35, 0.00] }
     };
 
     let tariffs = JSON.parse(JSON.stringify(DEFAULT_TARIFFS)); 
     let gameState = { rounds: [], playerNames: [] };
     let editModeIndex = -1;
+
+    function autoCalcSettings() {
+        const count = parseInt(document.getElementById('settingsPlayerCount').value);
+        let budgetInput = parseFloat(document.getElementById('set_budget').value);
+        
+        if (isNaN(budgetInput) || budgetInput <= 0) return;
+        
+        // 1. Basisanteil (40 Anteile gesamt im Spiel: 8 Stiche + 8 Herz + 8 Ober + 8 Max + 8 Letzter)
+        let rawBase = budgetInput / 40;
+        let baseUnit = Math.round(rawBase / 0.05) * 0.05;
+        if (baseUnit < 0.10) baseUnit = 0.10; // Mindestens 10 Cent
+        
+        let stichHerz = baseUnit;
+        let ober = baseUnit * 2;
+        let maxLetzter = baseUnit * 8;
+        
+        // 2. Tatsächliches Gesamtbudget berechnen (damit 5-Cent-Rundungen sauber aufgehen)
+        let realBudget = (8 * stichHerz) + (8 * stichHerz) + (4 * ober) + maxLetzter + maxLetzter;
+        
+        // Werte in die Inputs schreiben
+        document.getElementById('set_stich').value = stichHerz.toFixed(2);
+        document.getElementById('set_herz').value = stichHerz.toFixed(2);
+        document.getElementById('set_ober').value = ober.toFixed(2);
+        document.getElementById('set_max').value = maxLetzter.toFixed(2);
+        document.getElementById('set_letzter').value = maxLetzter.toFixed(2);
+        
+        // 3. Auszahlungen berechnen (orientiert an %-Verteilung von 4 Spielern)
+        let weights = [];
+        if (count === 4) weights = [5, 2, 1, 0];
+        else if (count === 5) weights = [8, 4, 2, 1, 0];
+        else if (count === 6) weights = [12, 6, 3, 2, 1, 0];
+        
+        let totalWeight = weights.reduce((a, b) => a + b, 0);
+        let payouts = [];
+        let currentSum = 0;
+        
+        for (let i = 0; i < count; i++) {
+            if (weights[i] === 0) {
+                payouts.push(0.00);
+            } else {
+                let rawShare = realBudget * (weights[i] / totalWeight);
+                let roundedShare = Math.round(rawShare / 0.05) * 0.05; // Auf 5ct runden
+                payouts.push(roundedShare);
+                currentSum += roundedShare;
+            }
+        }
+        
+        // 4. Etwaige Rundungsdifferenzen dem 1. Platz zurechnen, damit Summe exakt 100% stimmt
+        let diff = realBudget - currentSum;
+        diff = Math.round(diff * 100) / 100;
+        if (diff !== 0) payouts[0] += diff;
+        
+        let tempT = { payouts: payouts };
+        updateSettingsPreview(tempT);
+    }
 
     function checkAndBuild() {
         if (gameState.rounds.length > 0) {
@@ -791,8 +859,14 @@
     }
 
     function updateSettingsPreview(t) {
-        let payoutText = `Auszahlungen:<br>1. Platz: ${t.payouts[0].toFixed(2)}€ | 2. Platz: ${t.payouts[1].toFixed(2)}€ | 3. Platz: ${t.payouts[2].toFixed(2)}€`;
-        document.getElementById('settingsPreview').innerHTML = payoutText;
+        let texts = [];
+        for (let i = 0; i < t.payouts.length; i++) {
+            if (t.payouts[i] > 0) {
+                texts.push(`${i+1}. Platz: ${t.payouts[i].toFixed(2)}€`);
+            }
+        }
+        texts.push(`Letzter: 0,00€`);
+        document.getElementById('settingsPreview').innerHTML = `<strong>Auszahlungen:</strong><br>` + texts.join(' | ');
     }
 
     function resetToDefaults() {
@@ -820,16 +894,31 @@
         tariffs[count].max = m;
         tariffs[count].letzter = l;
 
-        const oldBudget = DEFAULT_TARIFFS[count].budget; 
-        const ratio = b / oldBudget;
+        // Payouts dynamisch berechnen
+        let weights = [];
+        if (count === 4) weights = [5, 2, 1, 0];
+        else if (count === 5) weights = [8, 4, 2, 1, 0];
+        else if (count === 6) weights = [12, 6, 3, 2, 1, 0];
         
-        if (count === 4) {
-            tariffs[4].payouts = [2.50 * ratio, 1.00 * ratio, 0.50 * ratio, 0.00];
-        } else if (count === 5) {
-            tariffs[5].payouts = [2.75 * ratio, 1.75 * ratio, 1.00 * ratio, 0.50 * ratio, 0.00];
-        } else if (count === 6) {
-            tariffs[6].payouts = [2.90 * ratio, 2.00 * ratio, 1.50 * ratio, 1.00 * ratio, 0.50 * ratio, 0.00];
+        let totalWeight = weights.reduce((a, b) => a + b, 0);
+        let payouts = [];
+        let currentSum = 0;
+        
+        for (let i = 0; i < count; i++) {
+            if (weights[i] === 0) {
+                payouts.push(0.00);
+            } else {
+                let rawShare = b * (weights[i] / totalWeight);
+                let roundedShare = Math.round(rawShare / 0.05) * 0.05;
+                payouts.push(roundedShare);
+                currentSum += roundedShare;
+            }
         }
+        
+        let diff = Math.round((b - currentSum) * 100) / 100;
+        if (diff !== 0) payouts[0] += diff;
+
+        tariffs[count].payouts = payouts;
 
         alert(`Tarife für ${count} Personen aktualisiert.`);
         closeSettings();
