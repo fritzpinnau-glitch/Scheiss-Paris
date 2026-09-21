@@ -31,163 +31,74 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Banner & Header */
-        .banner-container {
-            text-align: center;
-            padding: 20px 15px;
-        }
+        .banner-container { text-align: center; padding: 20px 15px; }
+        .header-image { max-width: 100%; height: auto; max-height: 200px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); border: 2px solid var(--accent-gold); object-fit: cover; }
         
-        .header-image {
-            max-width: 100%;
-            height: auto;
-            max-height: 200px;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            border: 2px solid var(--accent-gold);
-            object-fit: cover;
-        }
-        
-        .header { 
-            display: flex; justify-content: space-between; align-items: center; 
-            background: rgba(20, 42, 26, 0.85); 
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 2px solid var(--accent-gold); 
-            padding: 12px 20px; 
-            position: sticky; top: 0; z-index: 100; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
-        }
-        
-        .header-title {
-            font-size: 18px; 
-            color: #ffffff; 
-            font-weight: 700; 
-            letter-spacing: 0.5px;
-        }
-        
-        .settings-btn { 
-            background: none; border: none; font-size: 26px; cursor: pointer; 
-            padding: 8px; transition: transform 0.2s; 
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; background: rgba(20, 42, 26, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 2px solid var(--accent-gold); padding: 12px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .header-title { font-size: 18px; color: #ffffff; font-weight: 700; letter-spacing: 0.5px; }
+        .settings-btn { background: none; border: none; font-size: 26px; cursor: pointer; padding: 8px; transition: transform 0.2s; }
         .settings-btn:active { transform: scale(0.9); }
         
         .container { padding: 15px; max-width: 600px; margin: 0 auto; }
         
-        /* Typography & Layout */
-        .section-title { 
-            font-size: 22px; font-weight: 800; margin: 32px 0 16px 0; 
-            color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.4);
-            letter-spacing: 0.5px;
-        }
+        .section-title { font-size: 22px; font-weight: 800; margin: 32px 0 16px 0; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.4); letter-spacing: 0.5px; }
         
-        /* Modern Cards */
-        .card { 
-            background: var(--card-bg); 
-            border-radius: 16px; padding: 20px; margin-bottom: 16px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
-        }
-        
-        .card-title { 
-            font-size: 18px; font-weight: 700; margin-bottom: 16px; 
-            color: var(--text-main); display: flex; align-items: center; justify-content: space-between; 
-            border-bottom: 2px solid var(--border-color); padding-bottom: 12px;
-        }
+        .card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .card-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; }
         .card-title div { display: flex; align-items: center; }
         .card-title span { margin-right: 10px; font-size: 22px; }
         .card-hint { font-size: 13px; color: var(--text-muted); font-weight: 500; margin: -8px 0 16px 0; display: block; }
         
-        /* Touch-Friendly Inputs */
         .input-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
         .input-row:last-child { border-bottom: none; padding-bottom: 0; }
         .input-label { font-size: 16px; font-weight: 600; color: var(--text-main); flex-grow: 1; }
         
-        .input-field, .name-input, select.wide-select, .setup-bar select { 
-            background: var(--input-bg); border: 1.5px solid var(--border-color); border-radius: 10px; 
-            font-size: 16px; padding: 0 16px; height: 48px; color: var(--text-main); font-weight: 600;
-            transition: all 0.2s ease; appearance: none;
-        }
+        .input-field, .name-input, select.wide-select, .setup-bar select { background: var(--input-bg); border: 1.5px solid var(--border-color); border-radius: 10px; font-size: 16px; padding: 0 16px; height: 48px; color: var(--text-main); font-weight: 600; transition: all 0.2s ease; appearance: none; }
         
-        /* Spezifische Select-Pfeile für iOS/Android */
-        select.wide-select, .setup-bar select {
-            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231d1d1b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-            background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 12px auto;
-            padding-right: 40px;
-        }
+        select.wide-select, .setup-bar select { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231d1d1b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 12px auto; padding-right: 40px; }
 
         .input-field { width: 75px; text-align: center; padding: 0; }
         .name-input { width: 100%; margin-bottom: 8px;}
         select.wide-select { width: 100%; margin-top: 8px; }
         
-        .input-field:focus, .name-input:focus, select.wide-select:focus, .setup-bar select:focus { 
-            border-color: var(--accent-gold); outline: none; box-shadow: 0 0 0 3px rgba(207, 160, 82, 0.2); background: #ffffff;
-        }
-        
+        .input-field:focus, .name-input:focus, select.wide-select:focus, .setup-bar select:focus { border-color: var(--accent-gold); outline: none; box-shadow: 0 0 0 3px rgba(207, 160, 82, 0.2); background: #ffffff; }
         .error-highlight { border-color: var(--accent-red) !important; background-color: #fef2f2 !important; color: var(--accent-red) !important; }
         
-        /* Drag & Drop Liste */
         .sortable-list { list-style: none; position: relative; }
-        .sortable-item { 
-            display: flex; align-items: center; padding: 12px 16px; margin-bottom: 10px; 
-            background: var(--input-bg); border: 1.5px solid var(--border-color); border-radius: 10px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); user-select: none; transition: transform 0.1s; touch-action: none; 
-        }
-        .sortable-item.touch-dragging {
-            position: fixed !important; z-index: 9999; box-shadow: 0 16px 32px rgba(0,0,0,0.3); background: #ffffff; opacity: 0.95; pointer-events: none; border-color: var(--accent-gold);
-        }
+        .sortable-item { display: flex; align-items: center; padding: 12px 16px; margin-bottom: 10px; background: var(--input-bg); border: 1.5px solid var(--border-color); border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); user-select: none; transition: transform 0.1s; touch-action: none; }
+        .sortable-item.touch-dragging { position: fixed !important; z-index: 9999; box-shadow: 0 16px 32px rgba(0,0,0,0.3); background: #ffffff; opacity: 0.95; pointer-events: none; border-color: var(--accent-gold); }
         .sortable-ghost { opacity: 0.4; background: #f3f4f6; border: 2px dashed #9ca3af; }
         
-        .rank-badge { 
-            width: 32px; height: 32px; background: var(--accent-gold); color: #fff; 
-            border-radius: 50%; display: flex; justify-content: center; align-items: center; 
-            font-weight: 700; font-size: 14px; margin-right: 16px; flex-shrink: 0; 
-        }
+        .rank-badge { width: 32px; height: 32px; background: var(--accent-gold); color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 700; font-size: 14px; margin-right: 16px; flex-shrink: 0; }
         .player-name-lbl { font-size: 16px; font-weight: 600; color: var(--text-main); flex-grow: 1; }
         .drag-handle { color: #9ca3af; font-size: 24px; padding: 10px 15px; margin-right: -15px; cursor: grab; }
         .drag-handle:active { cursor: grabbing; color: var(--accent-gold); }
 
-        /* Buttons */
-        .btn { 
-            width: 100%; height: 56px; font-size: 17px; font-weight: 700; 
-            border: none; border-radius: 12px; cursor: pointer; 
-            display: flex; justify-content: center; align-items: center;
-            transition: all 0.2s; margin-top: 16px;
-        }
+        .btn { width: 100%; height: 56px; font-size: 17px; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; margin-top: 16px; }
         .btn-primary { background: var(--accent-red); color: #ffffff; box-shadow: 0 4px 12px rgba(158, 42, 43, 0.3); }
         .btn-primary:active { background: var(--accent-red-hover); transform: scale(0.98); }
-        
         .btn-danger { background: transparent; border: 2px solid #ef4444; color: #ef4444; margin-top: 32px; }
         .btn-danger:active { background: #fef2f2; }
-        
         .btn-edit { background: var(--input-bg); border: 1.5px solid var(--border-color); color: var(--text-main); height: 36px; padding: 0 16px; font-size: 14px; width: auto; margin: 0; border-radius: 8px;}
         .btn-edit:active { background: #e5e7eb; }
-        
         .btn-secondary { background: #e5e7eb; color: var(--text-main); }
         
-        /* Tabellen & Historie */
         .leaderboard-row, .history-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border-color); align-items: center; }
         .leaderboard-row:last-child, .history-row:last-child { border-bottom: none; padding-bottom: 0;}
         .name-col { font-weight: 700; font-size: 17px; color: var(--text-main); margin-bottom: 4px; }
         .money-col { font-size: 18px; font-weight: 800; min-width: 90px; text-align: right; }
         .details-text { font-size: 13px; color: var(--text-muted); font-weight: 500;}
-        
         .pos { color: var(--success-green); } .neg { color: var(--accent-red); } .zero { color: var(--text-muted); }
 
         .history-card { background: var(--card-bg); }
         .history-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 16px; margin-bottom: 12px; }
         .history-title { font-size: 18px; color: var(--text-main); font-weight: 700; }
-        
         .error-box { background-color: #fef2f2; border: 2px solid #ef4444; color: #b91c1c; padding: 16px; border-radius: 12px; margin-bottom: 20px; display: none; font-size: 15px; font-weight: 600; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15); }
         
-        /* Setup Bar */
-        .setup-bar { 
-            display: flex; align-items: center; justify-content: space-between; 
-            background: var(--card-bg); padding: 16px 20px; border-radius: 16px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 24px; color: var(--text-main);
-        }
+        .setup-bar { display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 16px 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 24px; color: var(--text-main); }
         .setup-bar strong { font-size: 16px; }
         .setup-bar select { width: 160px; height: 44px; margin: 0; }
 
-        /* Modal (Einstellungen) */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; overflow-y: auto; padding: 20px; }
         .modal-content { background: var(--card-bg); margin: 40px auto; padding: 24px; max-width: 500px; border-radius: 20px; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.4); color: var(--text-main);}
         .modal-close { position: absolute; top: 16px; right: 20px; font-size: 32px; cursor: pointer; color: var(--text-muted); font-weight: 300; line-height: 1;}
@@ -199,16 +110,9 @@
         .settings-input { width: 90px; height: 40px; text-align: right; padding: 0 12px; font-size: 15px; border: 1.5px solid var(--border-color); border-radius: 8px; font-weight: 700; background: #ffffff; }
         .settings-input:focus { border-color: var(--accent-gold); outline: none; }
         
-        .settings-input[readonly] {
-            background-color: #f3f4f6;
-            color: var(--text-muted);
-            cursor: not-allowed;
-            border-color: #e5e7eb;
-        }
-        .settings-input[readonly]:focus {
-            border-color: #e5e7eb;
-            box-shadow: none;
-        }
+        /* Das Budget-Feld ist nun readonly und hebt sich farblich ab */
+        .settings-input[readonly] { background-color: #f3f4f6; color: var(--text-muted); cursor: not-allowed; border-color: #e5e7eb; }
+        .settings-input[readonly]:focus { border-color: #e5e7eb; box-shadow: none; }
 
         .modal-buttons { display: flex; gap: 12px; }
         .modal-buttons .btn { margin-top: 0; }
@@ -301,16 +205,16 @@
         </div>
 
         <div class="settings-group">
-            <div class="settings-row">
-                <strong>Budget (€) pro Runde:</strong>
-                <input type="number" step="0.10" id="set_budget" class="settings-input" oninput="autoCalcSettings()">
-            </div>
+            <div class="settings-row"><span>Stich (pro Stück):</span> <input type="number" step="0.05" id="set_stich" class="settings-input" oninput="autoCalcSettings()"></div>
+            <div class="settings-row"><span>Herz (pro Stück):</span> <input type="number" step="0.05" id="set_herz" class="settings-input" oninput="autoCalcSettings()"></div>
+            <div class="settings-row"><span>Ober (pro Stück):</span> <input type="number" step="0.05" id="set_ober" class="settings-input" oninput="autoCalcSettings()"></div>
+            <div class="settings-row"><span>Max (Pauschal):</span> <input type="number" step="0.05" id="set_max" class="settings-input" oninput="autoCalcSettings()"></div>
+            <div class="settings-row"><span>Letzter Stich (Pausch.):</span> <input type="number" step="0.05" id="set_letzter" class="settings-input" oninput="autoCalcSettings()"></div>
             <hr style="border:0; border-top:1px solid var(--border-color); margin:16px 0;">
-            <div class="settings-row"><span>Stich (pro Stück):</span> <input type="number" id="set_stich" class="settings-input" readonly></div>
-            <div class="settings-row"><span>Herz (pro Stück):</span> <input type="number" id="set_herz" class="settings-input" readonly></div>
-            <div class="settings-row"><span>Ober (pro Stück):</span> <input type="number" id="set_ober" class="settings-input" readonly></div>
-            <div class="settings-row"><span>Max (Pauschal):</span> <input type="number" id="set_max" class="settings-input" readonly></div>
-            <div class="settings-row"><span>Letzter Stich (Pausch.):</span> <input type="number" id="set_letzter" class="settings-input" readonly></div>
+            <div class="settings-row">
+                <strong>Berechnetes Budget:</strong>
+                <input type="text" id="set_budget" class="settings-input" readonly>
+            </div>
         </div>
 
         <div style="font-size: 14px; color: var(--success-green); font-weight: 600; margin-bottom: 24px; text-align: center; background: #f0fdf4; padding: 12px; border-radius: 8px;" id="settingsPreview"></div>
@@ -324,7 +228,7 @@
 
 <script>
     const DEFAULT_TARIFFS = {
-        3: { budget: 4.00, stich: 0.10, herz: 0.10, ober: 0.20, max: 0.80, letzter: 0.80, payouts: [2.65, 1.35, 0.00] },
+        3: { budget: 4.00, stich: 0.10, herz: 0.10, ober: 0.20, max: 0.80, letzter: 0.80, payouts: [2.40, 1.60, 0.00] },
         4: { budget: 4.00, stich: 0.10, herz: 0.10, ober: 0.20, max: 0.80, letzter: 0.80, payouts: [2.50, 1.00, 0.50, 0.00] },
         5: { budget: 6.00, stich: 0.15, herz: 0.15, ober: 0.30, max: 1.20, letzter: 1.20, payouts: [3.20, 1.60, 0.80, 0.40, 0.00] },
         6: { budget: 8.00, stich: 0.20, herz: 0.20, ober: 0.40, max: 1.60, letzter: 1.60, payouts: [4.00, 2.00, 1.00, 0.65, 0.35, 0.00] }
@@ -334,14 +238,12 @@
     let gameState = { rounds: [], playerNames: [] };
     let editModeIndex = -1;
 
-    // --- Globale Variablen für Drag & Drop ---
     let draggedItem = null;
     let ghostItem = null;
     let startY = 0;
     let initialTop = 0;
     let isGlobalDragSetup = false;
 
-    // --- Local Storage Funktionen ---
     function saveToLocalStorage() {
         const data = {
             gameState: gameState,
@@ -359,45 +261,35 @@
                 gameState = data.gameState;
                 tariffs = data.tariffs;
                 document.getElementById('playerCount').value = data.playerCount;
-                
                 buildUI();
                 updateUI();
                 return true; 
-            } catch (e) {
-                console.error("Backup konnte nicht geladen werden", e);
-            }
+            } catch (e) { console.error("Backup konnte nicht geladen werden", e); }
         }
         return false; 
     }
 
-    // --- Spielelogik Funktionen ---
+    // --- NEUE BOTTOM-UP BERECHNUNG ---
     function autoCalcSettings() {
         const count = parseInt(document.getElementById('settingsPlayerCount').value);
-        let budgetInput = parseFloat(document.getElementById('set_budget').value);
         
-        if (isNaN(budgetInput) || budgetInput <= 0) return;
+        // Werte aus den Eingabefeldern lesen
+        let s = parseFloat(document.getElementById('set_stich').value) || 0;
+        let h = parseFloat(document.getElementById('set_herz').value) || 0;
+        let o = parseFloat(document.getElementById('set_ober').value) || 0;
+        let m = parseFloat(document.getElementById('set_max').value) || 0;
+        let l = parseFloat(document.getElementById('set_letzter').value) || 0;
         
-        let rawBase = budgetInput / 40;
-        let baseUnit = Math.round(rawBase / 0.05) * 0.05;
-        if (baseUnit < 0.10) baseUnit = 0.10; 
+        // Budget exakt berechnen: 8 Stiche + 8 Herz + 4 Ober + 1 Max + 1 Letzter
+        let totalBudget = (8 * s) + (8 * h) + (4 * o) + m + l;
+        document.getElementById('set_budget').value = totalBudget.toFixed(2) + " €";
         
-        let stichHerz = baseUnit;
-        let ober = baseUnit * 2;
-        let maxLetzter = baseUnit * 8;
-        
-        let realBudget = (8 * stichHerz) + (8 * stichHerz) + (4 * ober) + maxLetzter + maxLetzter;
-        
-        document.getElementById('set_stich').value = stichHerz.toFixed(2);
-        document.getElementById('set_herz').value = stichHerz.toFixed(2);
-        document.getElementById('set_ober').value = ober.toFixed(2);
-        document.getElementById('set_max').value = maxLetzter.toFixed(2);
-        document.getElementById('set_letzter').value = maxLetzter.toFixed(2);
-        
+        // Gewinnausschüttung berechnen (Gewichtungen)
         let weights = [];
-        if (count === 3) weights = [2, 1, 0];
-        else if (count === 4) weights = [5, 2, 1, 0];
-        else if (count === 5) weights = [8, 4, 2, 1, 0];
-        else if (count === 6) weights = [12, 6, 3, 2, 1, 0];
+        if (count === 3) weights = [60, 40, 0]; // 60% Erster, 40% Zweiter
+        else if (count === 4) weights = [25, 10, 5, 0];
+        else if (count === 5) weights = [32, 16, 8, 4, 0];
+        else if (count === 6) weights = [40, 20, 10, 6.5, 3.5, 0];
         
         let totalWeight = weights.reduce((a, b) => a + b, 0);
         let payouts = [];
@@ -407,19 +299,18 @@
             if (weights[i] === 0) {
                 payouts.push(0.00);
             } else {
-                let rawShare = realBudget * (weights[i] / totalWeight);
+                let rawShare = totalBudget * (weights[i] / totalWeight);
                 let roundedShare = Math.round(rawShare / 0.05) * 0.05; 
                 payouts.push(roundedShare);
                 currentSum += roundedShare;
             }
         }
         
-        let diff = realBudget - currentSum;
-        diff = Math.round(diff * 100) / 100;
+        // Differenzen bei Rundungen auf den Erstplatzierten übertragen
+        let diff = Math.round((totalBudget - currentSum) * 100) / 100;
         if (diff !== 0) payouts[0] += diff;
         
-        let tempT = { payouts: payouts };
-        updateSettingsPreview(tempT);
+        updateSettingsPreview({ payouts: payouts });
     }
 
     function checkAndBuild() {
@@ -477,10 +368,7 @@
     }
 
     function fillZero(element) {
-        if (element.value === "") {
-            element.value = "0";
-            checkLimitsLive();
-        }
+        if (element.value === "") { element.value = "0"; checkLimitsLive(); }
     }
 
     function checkLimitsLive() {
@@ -496,7 +384,6 @@
         ['stich', 'herz', 'ober'].forEach(cat => {
             const limit = cat === 'ober' ? 4 : 8;
             const isError = sums[cat] > limit;
-            
             for (let i = 1; i <= count; i++) {
                 const el = document.getElementById(`${cat}_${i}`);
                 if (el) {
@@ -536,9 +423,7 @@
             });
         }
 
-        function triggerVibration() {
-            if ("vibrate" in navigator) navigator.vibrate(50);
-        }
+        function triggerVibration() { if ("vibrate" in navigator) navigator.vibrate(50); }
         
         const startDrag = function(e, clientY, item) {
             draggedItem = item;
@@ -603,20 +488,15 @@
         if (!isGlobalDragSetup) {
             document.addEventListener('touchmove', (e) => { if(draggedItem) moveDrag(e, e.touches[0].clientY); }, {passive: false});
             document.addEventListener('touchend', endDrag);
-            
             document.addEventListener('mousemove', (e) => { if(draggedItem) moveDrag(e, e.clientY); });
             document.addEventListener('mouseup', () => { if(draggedItem) endDrag(); });
-            
             isGlobalDragSetup = true;
         }
     }
 
     function styleSelect(el) {
-        if (!el.value) {
-            el.style.color = 'var(--text-muted)'; 
-        } else {
-            el.style.color = 'var(--text-main)'; 
-        }
+        if (!el.value) el.style.color = 'var(--text-muted)'; 
+        else el.style.color = 'var(--text-main)'; 
     }
 
     function updateLabels() {
@@ -695,7 +575,6 @@
         document.getElementById('currentRoundTitle').innerText = `Runde ${round.roundNum} bearbeiten`;
         document.getElementById('roundCounterText').innerText = `Bearbeite Runde ${round.roundNum}`;
         document.getElementById('saveButton').innerText = "✓ Änderungen speichern";
-        
         document.getElementById('playerCountBar').style.display = 'none';
         
         checkLimitsLive(); 
@@ -877,22 +756,19 @@
         loadSettingsForm();
     }
 
-    function closeSettings() {
-        document.getElementById('settingsModal').style.display = 'none';
-    }
+    function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
 
     function loadSettingsForm() {
         const count = parseInt(document.getElementById('settingsPlayerCount').value);
         const t = tariffs[count];
         
-        document.getElementById('set_budget').value = t.budget.toFixed(2);
         document.getElementById('set_stich').value = t.stich.toFixed(2);
         document.getElementById('set_herz').value = t.herz.toFixed(2);
         document.getElementById('set_ober').value = t.ober.toFixed(2);
         document.getElementById('set_max').value = t.max.toFixed(2);
         document.getElementById('set_letzter').value = t.letzter.toFixed(2);
         
-        updateSettingsPreview(t);
+        autoCalcSettings(); 
     }
 
     function updateSettingsPreview(t) {
@@ -917,25 +793,28 @@
     function saveSettings() {
         const count = parseInt(document.getElementById('settingsPlayerCount').value);
         
-        const b = parseFloat(document.getElementById('set_budget').value);
-        const s = parseFloat(document.getElementById('set_stich').value);
-        const h = parseFloat(document.getElementById('set_herz').value);
-        const o = parseFloat(document.getElementById('set_ober').value);
-        const m = parseFloat(document.getElementById('set_max').value);
-        const l = parseFloat(document.getElementById('set_letzter').value);
+        // Werte direkt auslesen und speichern (Top-Down Logic komplett entfernt)
+        const s = parseFloat(document.getElementById('set_stich').value) || 0;
+        const h = parseFloat(document.getElementById('set_herz').value) || 0;
+        const o = parseFloat(document.getElementById('set_ober').value) || 0;
+        const m = parseFloat(document.getElementById('set_max').value) || 0;
+        const l = parseFloat(document.getElementById('set_letzter').value) || 0;
 
-        tariffs[count].budget = b;
+        const totalBudget = (8 * s) + (8 * h) + (4 * o) + m + l;
+
         tariffs[count].stich = s;
         tariffs[count].herz = h;
         tariffs[count].ober = o;
         tariffs[count].max = m;
         tariffs[count].letzter = l;
+        tariffs[count].budget = totalBudget;
 
+        // Auszahlungen berechnen und speichern
         let weights = [];
-        if (count === 3) weights = [2, 1, 0];
-        else if (count === 4) weights = [5, 2, 1, 0];
-        else if (count === 5) weights = [8, 4, 2, 1, 0];
-        else if (count === 6) weights = [12, 6, 3, 2, 1, 0];
+        if (count === 3) weights = [60, 40, 0];
+        else if (count === 4) weights = [25, 10, 5, 0];
+        else if (count === 5) weights = [32, 16, 8, 4, 0];
+        else if (count === 6) weights = [40, 20, 10, 6.5, 3.5, 0];
         
         let totalWeight = weights.reduce((a, b) => a + b, 0);
         let payouts = [];
@@ -945,19 +824,19 @@
             if (weights[i] === 0) {
                 payouts.push(0.00);
             } else {
-                let rawShare = b * (weights[i] / totalWeight);
+                let rawShare = totalBudget * (weights[i] / totalWeight);
                 let roundedShare = Math.round(rawShare / 0.05) * 0.05;
                 payouts.push(roundedShare);
                 currentSum += roundedShare;
             }
         }
         
-        let diff = Math.round((b - currentSum) * 100) / 100;
+        let diff = Math.round((totalBudget - currentSum) * 100) / 100;
         if (diff !== 0) payouts[0] += diff;
 
         tariffs[count].payouts = payouts;
 
-        alert(`Tarife für ${count} Personen aktualisiert.`);
+        alert(`Tarife für ${count} Personen aktualisiert. Neues Budget: ${totalBudget.toFixed(2)}€`);
         saveToLocalStorage();
         closeSettings();
     }
