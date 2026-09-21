@@ -218,6 +218,7 @@
 <body>
 
 <div class="banner-container">
+    <!-- Passe hier ggf. deinen Bildpfad wieder an -->
     <img src="Paris_Header.JPG" alt="Scheiß Paris Kartenspiel" class="header-image">
 </div>
 
@@ -305,7 +306,6 @@
                 <input type="number" step="0.10" id="set_budget" class="settings-input" oninput="autoCalcSettings()">
             </div>
             <hr style="border:0; border-top:1px solid var(--border-color); margin:16px 0;">
-            <!-- Die unteren Felder sind nun readonly -->
             <div class="settings-row"><span>Stich (pro Stück):</span> <input type="number" id="set_stich" class="settings-input" readonly></div>
             <div class="settings-row"><span>Herz (pro Stück):</span> <input type="number" id="set_herz" class="settings-input" readonly></div>
             <div class="settings-row"><span>Ober (pro Stück):</span> <input type="number" id="set_ober" class="settings-input" readonly></div>
@@ -333,32 +333,65 @@
     let gameState = { rounds: [], playerNames: [] };
     let editModeIndex = -1;
 
+    // --- Globale Variablen für Drag & Drop ---
+    let draggedItem = null;
+    let ghostItem = null;
+    let startY = 0;
+    let initialTop = 0;
+    let isGlobalDragSetup = false;
+
+    // --- Local Storage Funktionen ---
+    function saveToLocalStorage() {
+        const data = {
+            gameState: gameState,
+            tariffs: tariffs,
+            playerCount: document.getElementById('playerCount').value
+        };
+        localStorage.setItem('parisTrackerBackup', JSON.stringify(data));
+    }
+
+    function loadFromLocalStorage() {
+        const savedData = localStorage.getItem('parisTrackerBackup');
+        if (savedData) {
+            try {
+                const data = JSON.parse(savedData);
+                gameState = data.gameState;
+                tariffs = data.tariffs;
+                document.getElementById('playerCount').value = data.playerCount;
+                
+                buildUI();
+                updateUI();
+                return true; 
+            } catch (e) {
+                console.error("Backup konnte nicht geladen werden", e);
+            }
+        }
+        return false; 
+    }
+
+    // --- Spielelogik Funktionen ---
     function autoCalcSettings() {
         const count = parseInt(document.getElementById('settingsPlayerCount').value);
         let budgetInput = parseFloat(document.getElementById('set_budget').value);
         
         if (isNaN(budgetInput) || budgetInput <= 0) return;
         
-        // 1. Basisanteil (40 Anteile gesamt im Spiel: 8 Stiche + 8 Herz + 8 Ober + 8 Max + 8 Letzter)
         let rawBase = budgetInput / 40;
         let baseUnit = Math.round(rawBase / 0.05) * 0.05;
-        if (baseUnit < 0.10) baseUnit = 0.10; // Mindestens 10 Cent
+        if (baseUnit < 0.10) baseUnit = 0.10; 
         
         let stichHerz = baseUnit;
         let ober = baseUnit * 2;
         let maxLetzter = baseUnit * 8;
         
-        // 2. Tatsächliches Gesamtbudget berechnen (damit 5-Cent-Rundungen sauber aufgehen)
         let realBudget = (8 * stichHerz) + (8 * stichHerz) + (4 * ober) + maxLetzter + maxLetzter;
         
-        // Werte in die Inputs schreiben
         document.getElementById('set_stich').value = stichHerz.toFixed(2);
         document.getElementById('set_herz').value = stichHerz.toFixed(2);
         document.getElementById('set_ober').value = ober.toFixed(2);
         document.getElementById('set_max').value = maxLetzter.toFixed(2);
         document.getElementById('set_letzter').value = maxLetzter.toFixed(2);
         
-        // 3. Auszahlungen berechnen (orientiert an %-Verteilung von 4 Spielern)
         let weights = [];
         if (count === 4) weights = [5, 2, 1, 0];
         else if (count === 5) weights = [8, 4, 2, 1, 0];
@@ -373,13 +406,12 @@
                 payouts.push(0.00);
             } else {
                 let rawShare = realBudget * (weights[i] / totalWeight);
-                let roundedShare = Math.round(rawShare / 0.05) * 0.05; // Auf 5ct runden
+                let roundedShare = Math.round(rawShare / 0.05) * 0.05; 
                 payouts.push(roundedShare);
                 currentSum += roundedShare;
             }
         }
         
-        // 4. Etwaige Rundungsdifferenzen dem 1. Platz zurechnen, damit Summe exakt 100% stimmt
         let diff = realBudget - currentSum;
         diff = Math.round(diff * 100) / 100;
         if (diff !== 0) payouts[0] += diff;
@@ -400,6 +432,7 @@
         editModeIndex = -1;
         buildUI();
         updateUI();
+        saveToLocalStorage(); // Speichern nach Reset
     }
 
     function buildUI() {
@@ -409,7 +442,7 @@
         for(let i = 1; i <= count; i++) {
             let defaultName = gameState.playerNames[i-1] || `Spieler ${i}`;
             namesHtml += `<div class="input-row" style="border:none; padding-bottom:0;">
-                <input type="text" class="name-input" id="name_${i}" value="${defaultName}" oninput="updateLabels()" placeholder="Name Spieler ${i}">
+                <input type="text" class="name-input" id="name_${i}" value="${defaultName}" oninput="updateLabels()" onblur="saveToLocalStorage()" placeholder="Name Spieler ${i}">
             </div>`;
         }
         document.getElementById('namesContainer').innerHTML = namesHtml;
@@ -492,10 +525,6 @@
     function initTouchDragAndDrop() {
         const list = document.getElementById('auslegenList');
         const items = list.querySelectorAll('.sortable-item');
-        let draggedItem = null;
-        let ghostItem = null;
-        let startY = 0;
-        let initialTop = 0;
 
         function updateRanks() {
             const currentItems = list.querySelectorAll('.sortable-item:not(.sortable-ghost)');
@@ -508,72 +537,76 @@
         function triggerVibration() {
             if ("vibrate" in navigator) navigator.vibrate(50);
         }
+        
+        const startDrag = function(e, clientY, item) {
+            draggedItem = item;
+            triggerVibration();
+            document.body.style.overflow = 'hidden'; 
+            const rect = item.getBoundingClientRect();
+            startY = clientY;
+            initialTop = rect.top;
+
+            ghostItem = item.cloneNode(true);
+            ghostItem.classList.add('sortable-ghost');
+            item.after(ghostItem);
+
+            item.classList.add('touch-dragging');
+            item.style.top = `${initialTop}px`;
+            item.style.left = `${rect.left}px`;
+            item.style.width = `${rect.width}px`;
+        };
+
+        const moveDrag = function(e, clientY) {
+            if (!draggedItem) return;
+            e.preventDefault();
+            const deltaY = clientY - startY;
+            draggedItem.style.top = `${initialTop + deltaY}px`;
+
+            const dragRect = draggedItem.getBoundingClientRect();
+            const dragCenterY = dragRect.top + (dragRect.height / 2);
+            const currentItems = Array.from(list.querySelectorAll('.sortable-item:not(.touch-dragging)'));
+            
+            let nextSibling = null;
+            for (let i = 0; i < currentItems.length; i++) {
+                const el = currentItems[i];
+                if(el === ghostItem) continue; 
+                const rect = el.getBoundingClientRect();
+                const elCenterY = rect.top + (rect.height / 2);
+                if (dragCenterY < elCenterY) {
+                    nextSibling = el;
+                    break;
+                }
+            }
+            if (nextSibling) list.insertBefore(ghostItem, nextSibling);
+            else list.appendChild(ghostItem);
+            updateRanks();
+        };
+
+        const endDrag = function() {
+            if(!draggedItem) return;
+            ghostItem.replaceWith(draggedItem);
+            draggedItem.classList.remove('touch-dragging');
+            draggedItem.style.top = ''; draggedItem.style.left = ''; draggedItem.style.width = '';
+            draggedItem = null; ghostItem = null;
+            document.body.style.overflow = '';
+            updateRanks();
+        };
 
         items.forEach(item => {
             const handle = item.querySelector('.drag-handle');
+            handle.addEventListener('touchstart', (e) => startDrag(e, e.touches[0].clientY, item), {passive: false});
+            handle.addEventListener('mousedown', (e) => startDrag(e, e.clientY, item));
+        });
+
+        if (!isGlobalDragSetup) {
+            document.addEventListener('touchmove', (e) => { if(draggedItem) moveDrag(e, e.touches[0].clientY); }, {passive: false});
+            document.addEventListener('touchend', endDrag);
             
-            const startDrag = function(e, clientY) {
-                draggedItem = item;
-                triggerVibration();
-                document.body.style.overflow = 'hidden'; 
-                const rect = item.getBoundingClientRect();
-                startY = clientY;
-                initialTop = rect.top;
-
-                ghostItem = item.cloneNode(true);
-                ghostItem.classList.add('sortable-ghost');
-                item.after(ghostItem);
-
-                item.classList.add('touch-dragging');
-                item.style.top = `${initialTop}px`;
-                item.style.left = `${rect.left}px`;
-                item.style.width = `${rect.width}px`;
-            };
-
-            const moveDrag = function(e, clientY) {
-                if (!draggedItem) return;
-                e.preventDefault();
-                const deltaY = clientY - startY;
-                draggedItem.style.top = `${initialTop + deltaY}px`;
-
-                const dragRect = draggedItem.getBoundingClientRect();
-                const dragCenterY = dragRect.top + (dragRect.height / 2);
-                const currentItems = Array.from(list.querySelectorAll('.sortable-item:not(.touch-dragging)'));
-                
-                let nextSibling = null;
-                for (let i = 0; i < currentItems.length; i++) {
-                    const el = currentItems[i];
-                    if(el === ghostItem) continue; 
-                    const rect = el.getBoundingClientRect();
-                    const elCenterY = rect.top + (rect.height / 2);
-                    if (dragCenterY < elCenterY) {
-                        nextSibling = el;
-                        break;
-                    }
-                }
-                if (nextSibling) list.insertBefore(ghostItem, nextSibling);
-                else list.appendChild(ghostItem);
-                updateRanks();
-            };
-
-            const endDrag = function() {
-                if(!draggedItem) return;
-                ghostItem.replaceWith(draggedItem);
-                draggedItem.classList.remove('touch-dragging');
-                draggedItem.style.top = ''; draggedItem.style.left = ''; draggedItem.style.width = '';
-                draggedItem = null; ghostItem = null;
-                document.body.style.overflow = '';
-                updateRanks();
-            };
-
-            handle.addEventListener('touchstart', (e) => startDrag(e, e.touches[0].clientY), {passive: false});
-            handle.addEventListener('touchmove', (e) => moveDrag(e, e.touches[0].clientY), {passive: false});
-            handle.addEventListener('touchend', endDrag);
-
-            handle.addEventListener('mousedown', (e) => startDrag(e, e.clientY));
             document.addEventListener('mousemove', (e) => { if(draggedItem) moveDrag(e, e.clientY); });
             document.addEventListener('mouseup', () => { if(draggedItem) endDrag(); });
-        });
+            
+            isGlobalDragSetup = true;
+        }
     }
 
     function styleSelect(el) {
@@ -751,6 +784,7 @@
         checkLimitsLive(); 
 
         updateUI();
+        saveToLocalStorage(); // Speichert die Daten lokal ab
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -830,6 +864,7 @@
 
     function resetGame() {
         if(confirm("Möchtest du das Spiel wirklich beenden und löschen?")) {
+            localStorage.removeItem('parisTrackerBackup'); // Löscht den lokalen Speicher
             window.location.reload(); 
         }
     }
@@ -894,7 +929,6 @@
         tariffs[count].max = m;
         tariffs[count].letzter = l;
 
-        // Payouts dynamisch berechnen
         let weights = [];
         if (count === 4) weights = [5, 2, 1, 0];
         else if (count === 5) weights = [8, 4, 2, 1, 0];
@@ -921,10 +955,16 @@
         tariffs[count].payouts = payouts;
 
         alert(`Tarife für ${count} Personen aktualisiert.`);
+        saveToLocalStorage(); // Speichert die neuen Settings
         closeSettings();
     }
 
-    window.onload = buildUI;
+    window.onload = function() {
+        // Wenn kein Backup gefunden wird, starte ein neues UI
+        if (!loadFromLocalStorage()) {
+            buildUI();
+        }
+    };
 </script>
 
 </body>
