@@ -199,7 +199,6 @@
         .settings-input { width: 90px; height: 40px; text-align: right; padding: 0 12px; font-size: 15px; border: 1.5px solid var(--border-color); border-radius: 8px; font-weight: 700; background: #ffffff; }
         .settings-input:focus { border-color: var(--accent-gold); outline: none; }
         
-        /* Neu: Styling für nicht-bearbeitbare Inputs */
         .settings-input[readonly] {
             background-color: #f3f4f6;
             color: var(--text-muted);
@@ -218,7 +217,6 @@
 <body>
 
 <div class="banner-container">
-    <!-- Passe hier ggf. deinen Bildpfad wieder an -->
     <img src="Paris_Header.JPG" alt="Scheiß Paris Kartenspiel" class="header-image">
 </div>
 
@@ -233,6 +231,7 @@
     <div class="setup-bar" id="playerCountBar">
         <strong>Spieleranzahl:</strong>
         <select id="playerCount" onchange="checkAndBuild()">
+            <option value="3">3 Personen</option>
             <option value="4" selected>4 Personen</option>
             <option value="5">5 Personen</option>
             <option value="6">6 Personen</option>
@@ -294,6 +293,7 @@
         <div class="setup-bar" style="box-shadow: none; border: 1px solid var(--border-color); padding: 12px 16px; margin-bottom: 20px;">
             <strong>Modus:</strong>
             <select id="settingsPlayerCount" onchange="loadSettingsForm()">
+                <option value="3">3 Personen</option>
                 <option value="4">4 Personen</option>
                 <option value="5">5 Personen</option>
                 <option value="6">6 Personen</option>
@@ -324,6 +324,7 @@
 
 <script>
     const DEFAULT_TARIFFS = {
+        3: { budget: 4.00, stich: 0.10, herz: 0.10, ober: 0.20, max: 0.80, letzter: 0.80, payouts: [2.65, 1.35, 0.00] },
         4: { budget: 4.00, stich: 0.10, herz: 0.10, ober: 0.20, max: 0.80, letzter: 0.80, payouts: [2.50, 1.00, 0.50, 0.00] },
         5: { budget: 6.00, stich: 0.15, herz: 0.15, ober: 0.30, max: 1.20, letzter: 1.20, payouts: [3.20, 1.60, 0.80, 0.40, 0.00] },
         6: { budget: 8.00, stich: 0.20, herz: 0.20, ober: 0.40, max: 1.60, letzter: 1.60, payouts: [4.00, 2.00, 1.00, 0.65, 0.35, 0.00] }
@@ -393,7 +394,8 @@
         document.getElementById('set_letzter').value = maxLetzter.toFixed(2);
         
         let weights = [];
-        if (count === 4) weights = [5, 2, 1, 0];
+        if (count === 3) weights = [2, 1, 0];
+        else if (count === 4) weights = [5, 2, 1, 0];
         else if (count === 5) weights = [8, 4, 2, 1, 0];
         else if (count === 6) weights = [12, 6, 3, 2, 1, 0];
         
@@ -432,7 +434,7 @@
         editModeIndex = -1;
         buildUI();
         updateUI();
-        saveToLocalStorage(); // Speichern nach Reset
+        saveToLocalStorage();
     }
 
     function buildUI() {
@@ -784,7 +786,7 @@
         checkLimitsLive(); 
 
         updateUI();
-        saveToLocalStorage(); // Speichert die Daten lokal ab
+        saveToLocalStorage(); 
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -864,7 +866,7 @@
 
     function resetGame() {
         if(confirm("Möchtest du das Spiel wirklich beenden und löschen?")) {
-            localStorage.removeItem('parisTrackerBackup'); // Löscht den lokalen Speicher
+            localStorage.removeItem('parisTrackerBackup'); 
             window.location.reload(); 
         }
     }
@@ -930,7 +932,8 @@
         tariffs[count].letzter = l;
 
         let weights = [];
-        if (count === 4) weights = [5, 2, 1, 0];
+        if (count === 3) weights = [2, 1, 0];
+        else if (count === 4) weights = [5, 2, 1, 0];
         else if (count === 5) weights = [8, 4, 2, 1, 0];
         else if (count === 6) weights = [12, 6, 3, 2, 1, 0];
         
@@ -955,12 +958,11 @@
         tariffs[count].payouts = payouts;
 
         alert(`Tarife für ${count} Personen aktualisiert.`);
-        saveToLocalStorage(); // Speichert die neuen Settings
+        saveToLocalStorage();
         closeSettings();
     }
 
     window.onload = function() {
-        // Wenn kein Backup gefunden wird, starte ein neues UI
         if (!loadFromLocalStorage()) {
             buildUI();
         }
